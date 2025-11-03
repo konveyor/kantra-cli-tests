@@ -134,7 +134,7 @@ jobs:
   #      maven_token: ${{ secrets.GH_TOKEN }}
 
   tests-mac-containers:
-    runs-on: macos-13 # Intel, M1-based macos-latest doesn't support nested virtualization (containers)
+    runs-on: macos-15-intel # Intel, M1-based macos-latest doesn't support nested virtualization (containers)
     needs: make-kantra-bundle
     steps:
     - uses: actions/checkout@v4
