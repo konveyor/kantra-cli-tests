@@ -61,6 +61,10 @@
 - description: This ruleset provides analysis of logging libraries.
   name: technology-usage
   tags:
+  - EJB XML
+  - Java Source
+  - Maven XML
+  - Properties
   - Bean=EJB XML
   - Connect=EJB XML
   - Connect=Servlet
