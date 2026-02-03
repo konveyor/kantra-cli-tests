@@ -34,6 +34,8 @@ runs:
   - name: Configure Test Environment
     shell: bash
     run: |
+      mkdir -p /home/runner/.config
+      ln -sf /home/runner/.kantra /home/runner/.config/.kantra
       chmod +x /home/runner/.kantra/kantra
       mkdir ${{ github.workspace }}/report
       # Temporary dirty workaround to execute container kantra (with run-local=false)
