@@ -1,0 +1,161 @@
+{{- range $process := .Values.manifest.processes }}
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ $.Values.manifest.name }}-{{ $process.type }}
+  labels:
+    app.kubernetes.io/name: {{ $.Values.manifest.name }}
+    app.kubernetes.io/component: {{ $process.type }}
+spec:
+  strategy:
+    type: {{ $.Values.deploymentStrategy.type }}
+    {{- if eq $.Values.deploymentStrategy.type "RollingUpdate" }}
+    {{- with $.Values.deploymentStrategy }}
+    rollingUpdate:
+      maxSurge: {{ .rollingMaxSurge }}
+      maxUnavailable: {{ .rollingMaxUnavailable }}
+    {{- end }}
+    {{- end }}
+    {{- if eq $.Values.deploymentStrategy.type "Recreate" }}
+    recreateParams:
+      timeoutSeconds: {{ $.Values.deploymentStrategy.timeout }}
+    {{- end }}
+  replicas: {{ $process.instances }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ $.Values.manifest.name }}
+      app.kubernetes.io/component: {{ $process.type }}
+  template:
+    metadata:
+      name: {{ $.Values.manifest.name }}-{{ $process.type }}
+      labels:
+        app.kubernetes.io/name: {{ $.Values.manifest.name }}
+        app.kubernetes.io/component: {{ $process.type }}
+    spec:
+      terminationGracePeriodSeconds: {{ $.Values.terminationGracePeriod | default 60 }}
+      serviceAccountName: {{ include "hello-spring-cloud.serviceAccountName" $ }}
+      containers:
+      - name: {{ $.Values.manifest.name }}-{{ $process.type }}
+        image: "{{ $.Values.image.registry }}/{{ $.Values.manifest.name }}-{{ $process.type }}:{{ $.Values.image.tag }}"
+        imagePullPolicy: {{ $.Values.image.pullPolicy }}
+        {{- if $process.command }}
+        {{- include "hello-spring-cloud.command.parse" $process.command | nindent 8 }}
+        {{- end }}
+        ports:
+          - containerPort: {{ $.Values.port }}
+            protocol: TCP
+        env:
+          {{- /* CF applications are expected to listen on the port specified by the $PORT environment variable */}}
+          - name: PORT
+            value: "{{ $.Values.port }}"
+        {{- if $.Values.manifest.env }}
+        {{- range $key, $value := $.Values.manifest.env }}
+          - name: {{ $key }}
+            value: {{ include "hello-spring-cloud.quoteIfNotString" $value }}
+        {{- end }}
+        {{- end }}
+        {{- if or ($.Values.limits) ($.Values.requests) }}
+        resources:
+          {{- if $.Values.limits }}
+          limits:
+            cpu: {{ $.Values.limits.cpu }}
+            memory: {{ $process.memory }}
+          {{- end }}
+          {{- if $.Values.requests }}
+          requests:
+            cpu: {{ $.Values.requests.cpu }}
+            memory: {{ $process.memory }}
+          {{- end }}
+        {{- end }}
+        {{- /* All CF processes have implicit or explicit health checks that translate into liveness probes*/}}
+        livenessProbe:
+          {{- if eq $process.healthCheck.type "process" }}
+          {{- if $process.command }}
+          exec:
+            command:
+              - sh
+              - -c
+              - "ps -ef | grep '{{ include "hello-spring-cloud.executableName" $process.command }}' | grep -v grep"
+          {{- else }}
+          tcpSocket:
+            port: {{ $.Values.port }}
+          {{- end }}
+          {{- else if eq $process.healthCheck.type "port" }}
+          tcpSocket:
+            port: {{ $.Values.port }}
+          {{- else if eq $process.healthCheck.type "http" }}
+          httpGet:
+            path: {{ $process.healthCheck.endpoint }}
+            port: {{ $.Values.port }}
+          {{- end }}
+          {{- if or (eq $process.healthCheck.type "port") (eq $process.healthCheck.type "http") }}
+          periodSeconds: {{ $process.healthCheck.interval }}
+          timeoutSeconds: {{ $process.healthCheck.invocationTimeout }}
+          {{- end }}
+        {{- /* All CF processes have implicit or explicit readiness checks that translate into readiness probes*/}}
+        readinessProbe:
+          {{- if eq $process.readinessCheck.type "process" }}
+          {{- if $process.command }}
+          exec:
+            command:
+              - sh
+              - -c
+              - "ps -ef | grep '{{ include "hello-spring-cloud.executableName" $process.command }}' | grep -v grep"
+          {{- else }}
+          tcpSocket:
+            port: {{ $.Values.port }}
+          {{- end }}
+          {{- else if eq $process.readinessCheck.type "port" }}
+          tcpSocket:
+            port: {{ $.Values.port }}
+          {{- else if eq $process.readinessCheck.type "http" }}
+          httpGet:
+            path: {{ $process.readinessCheck.endpoint }}
+            port: {{ $.Values.port }}
+          {{- end }}
+          {{- if or (eq $process.readinessCheck.type "port") (eq $process.readinessCheck.type "http") }}
+          periodSeconds: {{ $process.readinessCheck.interval }}
+          timeoutSeconds: {{ $process.readinessCheck.invocationTimeout }}
+          {{- end }}
+      {{- if $.Values.manifest.sidecars }}
+      {{- range $sidecar := $.Values.manifest.sidecars }}
+      {{- if or (not $sidecar.processType) (has $process.type $sidecar.processType) }}
+      - name: {{ $sidecar.name }}
+        image: "{{ $.Values.image.registry }}/{{ $sidecar.name }}:{{ $.Values.image.tag }}"
+        imagePullPolicy: {{ $.Values.image.pullPolicy }}
+        {{- if $sidecar.command }}
+        {{- include "hello-spring-cloud.command.parse" $sidecar.command | nindent 8 }}
+        {{- end }}
+        {{- if $.Values.manifest.env }}
+        env:
+        {{- range $key, $value := $.Values.manifest.env }}
+          - name: {{ $key }}
+            value: {{ include "hello-spring-cloud.quoteIfNotString" $value }}
+        {{- end }}
+        {{- end }}
+        {{- if or ($.Values.limits) ($.Values.requests) }}
+        resources:
+          {{- if $.Values.limits }}
+          limits:
+            cpu: {{ $.Values.limits.cpu }}
+            memory: {{ $sidecar.memory }}
+          {{- end }}
+          {{- if $.Values.requests }}
+          requests:
+            cpu: {{ $.Values.requests.cpu }}
+            memory: {{ $sidecar.memory }}
+          {{- end }}
+        {{- end }}
+        {{- /* Sidecars have an implicit health check of type "process"*/}}
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - "ps -ef | grep '{{ include "hello-spring-cloud.executableName" $sidecar.command }}' | grep -v grep"
+          initialDelaySeconds: {{ $process.healthCheck.timeout }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
+{{- end }}
