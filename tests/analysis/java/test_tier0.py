@@ -29,7 +29,7 @@ def test_analysis(tc_name, java_analysis_data):
     input_path = os.path.join(project_path, "data", "tmp", tc_name)
     if input.get('git'):
         if not os.path.exists(input_path):
-            os.system("git clone %s %s" % (input['git'], input_path))
+            os.system('git clone %s "%s"' % (input['git'], input_path))
             #if input['branch']:
                 # chdir?
                 #os.system("git fetch origin %s:fetched" % input['branch'])

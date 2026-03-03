@@ -35,12 +35,6 @@
     "targets": ["camel4"],
     "sources": ["camel2"]
   },
-  "gradle-multi-project": {
-    "app_name": "gradle-multi-project",
-    "file_name": "gradle-multi-project-example",
-    "targets": ["openjdk"],
-    "sources": []
-  },
   "tackle-testapp-project": {
     "app_name": "tackle-testapp",
     "file_name": "tackle-testapp",
@@ -57,7 +51,7 @@
   "kitchensink": {
     "app_name": "kitchensink",
     "file_name": "kitchensink.war",
-    "targets": ["eap7"],
+    "targets": ["eap8"],
     "sources": []
   }
 }

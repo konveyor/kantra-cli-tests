@@ -4,3 +4,6 @@
 [submodule "data/ci"]
 	path = data/ci
 	url = https://github.com/konveyor/ci.git
+[submodule "data/yaml/test-rules"]
+	path = data/yaml/test-rules
+	url = https://github.com/abrugaro/test-rules.git

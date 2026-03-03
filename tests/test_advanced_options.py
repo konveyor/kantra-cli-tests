@@ -109,7 +109,8 @@ def test_analysis_of_private_repo(analysis_data, additional_args):
     application_data = analysis_data['tackle-testapp-public']
     custom_maven_settings = os.path.join(
         os.getenv(constants.PROJECT_PATH),
-        'data/xml',
+        'data',
+        'xml',
         'tackle-testapp-public-settings.xml'
     )
     manage_credentials_in_maven_xml(custom_maven_settings)
@@ -128,7 +129,7 @@ def test_analysis_of_private_repo(analysis_data, additional_args):
     report_data = get_json_from_report_output_js_file(False)
     assert len(report_data[0]['depItems']) >= 0, "No dependencies were found"
     violations = [item for item in report_data[0]['rulesets'] if item.get('violations')]
-    assert len(violations) > 1, "Expected issues are missing";
+    assert len(violations) > 1, "Expected issues are missing"
 
     manage_credentials_in_maven_xml(custom_maven_settings, True)
 
@@ -194,8 +195,8 @@ def test_language_discovery(analysis_data, python_analysis_data, golang_analysis
             assert language in output, f"Language {language} was not detected in the {application_data['app_name']} app"
 
 
-def test_custom_rules_disable_default_issue_769(analysis_data):
-    # This test hits a known issue https://github.com/konveyor/analyzer-lsp/issues/769
+def test_custom_rules_disable_default_issue_781_855(analysis_data):
+    # This test hits 2 known issues https://github.com/konveyor/analyzer-lsp/issues/781 & https://github.com/konveyor/analyzer-lsp/issues/855
     application_data = analysis_data['tackle-testapp-project']
     assert os.getenv(constants.PROJECT_PATH) is not None
     custom_rule_path = os.path.join(os.getenv(constants.PROJECT_PATH), 'data', 'yaml', 'test-rules')

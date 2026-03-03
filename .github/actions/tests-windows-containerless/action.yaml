@@ -1,17 +1,16 @@
 name: CLI container-less on Windows
+description: Run Kantra CLI tests in containerless mode on Windows
 
 inputs:
   tier:
     description: |
       Test TIER name
     required: false
-    type: string
     default: TIER0
   maven_token:
     description: |
       Token for public github maven repo access
     required: false
-    type: string
     default: ""
 
 runs:
@@ -39,20 +38,15 @@ runs:
       python -m pip install --upgrade pip
       pip install -r requirements.txt
       mkdir ${{ github.workspace }}\report
+    working-directory: ${{ github.workspace }}
 
-  - name: Run TIER0 analysis test
+  - name: Run tests
     uses: nick-fields/retry@v3
     with:
       timeout_minutes: 20
       max_attempts: 3
       shell: cmd
-      command: |
-        set KANTRA_CLI_PATH=C:\Users\runneradmin\.kantra\windows-kantra.exe
-        set REPORT_OUTPUT_PATH=${{ github.workspace }}\report
-        set PROJECT_PATH=${{ github.workspace }}
-        set GIT_PASSWORD=${{ inputs.maven_token }}
-
-        pytest -s tests/analysis/java/test_tier0.py
+      command: set KANTRA_CLI_PATH=C:\Users\runneradmin\.kantra\windows-kantra&& set REPORT_OUTPUT_PATH=${{ github.workspace }}\report&& set PROJECT_PATH=${{ github.workspace }}&& set GIT_PASSWORD=${{ inputs.maven_token }}&& cd /d ${{ github.workspace }}&& pytest -s tests/analysis/java/test_tier0.py
 
   - name: Save analysis output
     uses: actions/upload-artifact@v4

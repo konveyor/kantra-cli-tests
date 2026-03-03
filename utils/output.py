@@ -19,10 +19,9 @@ def assert_analysis_output_violations(expected_output_dir, output_dir, input_roo
     got_output_normalized_path = got_output_path + ".normalized.yaml"
 
     # create a preprocessed/normalized outfile file to allow its comparison across platforms and setups
+    got_output = normalize_output(got_output, input_root_path)
     with open(got_output_normalized_path, 'w') as f:
-            yaml.dump(normalize_output(got_output, input_root_path), f)
-    with open(got_output_normalized_path, encoding='utf-8') as file:
-        got_output = yaml.safe_load(file)
+        yaml.dump(got_output, f)
 
     if not os.path.exists(expected_output_dir):
         os.mkdir(expected_output_dir)
@@ -36,7 +35,7 @@ def assert_analysis_output_violations(expected_output_dir, output_dir, input_roo
     else:
         with open(expected_output_path) as f:
             expected_output = yaml.safe_load(f)
-
+        expected_output = normalize_output(expected_output, input_root_path)
     assert got_output == expected_output, "Got different analysis output: \n%s" % get_files_diff(expected_output_path, got_output_normalized_path)
 
 
@@ -96,6 +95,7 @@ def get_dict_from_output_file(filename, dir=None, **kwargs):
 def get_files_diff(a, b):
     return os.popen("diff -u '%s' '%s'" % (a, b)).read()
 
+
 def normalize_output(rulesets: dict, input_root_path):
     """
         Does a pruning on output file to delete not used fields (skipped and unmatched rules),
@@ -119,7 +119,9 @@ def normalize_output(rulesets: dict, input_root_path):
                             for line in incident['codeSnip'].splitlines():
                                 line = line.strip()
                                 if line.startswith(str(incident['lineNumber'])):
-                                    incident['codeSnip'] = line
+                                    line_no_str = str(incident['lineNumber'])
+                                    after_number = line[len(line_no_str):].lstrip()
+                                    incident['codeSnip'] = line_no_str + ' ' + after_number
                                     break
                             # normalize incidents path to make compatible container with containerless, fix slashes, etc.
                             incident['uri'] = trim_incident_uri(repr(incident['uri']), repr(input_root_path))

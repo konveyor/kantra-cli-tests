@@ -7,7 +7,7 @@
       description: File system - Java IO
       effort: 1
       incidents:
-      - codeSnip: 14           InputStream inputStream = new FileInputStream("/opt/config/configuration.properties");
+      - codeSnip: 14 InputStream inputStream = new FileInputStream("/opt/config/configuration.properties");
         lineNumber: 14
         message: "An application running inside a container could lose access to a\
           \ file in local storage.\n\n Recommendations\n\n The following recommendations\
@@ -39,7 +39,6 @@
         url: https://12factor.net/logs
 - name: discovery-rules
   tags:
-  - EJB XML
   - Java Source
   - Maven XML
   - Properties
@@ -49,7 +48,7 @@
       description: Hardcoded IP Address
       effort: 1
       incidents:
-      - codeSnip: 2   jdbc.url=jdbc:oracle:thin:@10.19.2.93:1521:xe
+      - codeSnip: 2 jdbc.url=jdbc:oracle:thin:@10.19.2.93:1521:xe
         lineNumber: 2
         message: When migrating environments, hard-coded IP addresses may need to
           be modified or eliminated.
@@ -61,8 +60,6 @@
 - description: This ruleset provides analysis of logging libraries.
   name: technology-usage
   tags:
-  - Bean=EJB XML
-  - Connect=EJB XML
   - Connect=Servlet
   - Embedded Spring Data JPA
   - Embedded framework - Micrometer
@@ -82,7 +79,6 @@
   - HTTP=Servlet
   - Integration=Micrometer
   - Inversion of Control=Spring DI
-  - Java EE=EJB XML
   - Java EE=JPA named queries
   - Java EE=Servlet
   - Java Servlet

@@ -1,23 +1,26 @@
-name: CLI containes on Mac
+name: CLI containers on Mac
+description: Run Kantra CLI tests in container mode on macOS
 
 inputs:
   tier:
     description: |
       Test TIER name
     required: false
-    type: string
     default: TIER0
   maven_token:
     description: |
       Token for public github maven repo access
     required: false
-    type: string
     default: ""
 
 runs:
   using: "composite"
   steps:
   - uses: actions/checkout@v4
+  - name: Setup Python
+    uses: actions/setup-python@v5
+    with:
+      python-version: '3.12'
   - name: Setup Homebrew
     uses: Homebrew/actions/setup-homebrew@master
   - name: Install podman
@@ -50,7 +53,7 @@ runs:
       python -m pip install --upgrade pip
       pip install -r requirements.txt
 
-  - name: Run TIER0 analysis test
+  - name: Run tests
     uses: nick-fields/retry@v3
     with:
       timeout_minutes: 40
@@ -62,7 +65,11 @@ runs:
         export PROJECT_PATH=${{ github.workspace }}
         export GIT_PASSWORD=${{ inputs.maven_token }}
 
-        pytest -s tests/analysis/java/test_tier0.py
+        if [ "${{ inputs.tier }}" = "TIER0" ]; then
+          pytest -s tests/analysis/java/test_tier0.py
+        else
+          pytest -s tests/
+        fi
 
   - name: Save analysis output
     uses: actions/upload-artifact@v4

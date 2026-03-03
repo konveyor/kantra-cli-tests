@@ -1,17 +1,16 @@
-name: CLI container-less on Mac
+name: CLI container-less on Mac ARM64
+description: Run Kantra CLI tests in containerless mode on macOS ARM64
 
 inputs:
   tier:
     description: |
       Test TIER name
     required: false
-    type: string
     default: TIER0
   maven_token:
     description: |
       Token for public github maven repo access
     required: false
-    type: string
     default: ""
 
 runs:
@@ -49,7 +48,7 @@ runs:
       python -m pip install --upgrade pip
       pip install -r requirements.txt
 
-  - name: Run TIER0 analysis test
+  - name: Run tests
     uses: nick-fields/retry@v3
     with:
       timeout_minutes: 20
@@ -62,7 +61,11 @@ runs:
         export PROJECT_PATH=${{ github.workspace }}
         export GIT_PASSWORD=${{ inputs.maven_token }}
 
-        pytest -s tests/analysis/java/test_tier0.py
+        if [ "${{ inputs.tier }}" = "TIER0" ]; then
+          pytest -s tests/analysis/java/test_tier0.py
+        else
+          pytest -s tests/
+        fi
 
   - name: Save analysis output
     uses: actions/upload-artifact@v4

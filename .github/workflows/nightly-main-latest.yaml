@@ -2,12 +2,12 @@ name: Nightly CLI test for main
 
 on:
   schedule:
-    - cron: '08 1,13 * * *'
+    - cron: '0 1 * * *'
 
 jobs:
   test-suite:
-    uses: konveyor-ecosystem/kantra-cli-tests/.github/workflows/test-suite.yaml@main
+    uses: konveyor/kantra-cli-tests/.github/workflows/test-suite.yaml@main
     secrets: inherit
     with:
       tag: latest
-      tier: TIER0
+      tier: ALL

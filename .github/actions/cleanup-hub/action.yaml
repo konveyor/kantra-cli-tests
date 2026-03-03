@@ -1,0 +1,67 @@
+name: Cleanup Hub Instance
+description: Stop and cleanup hub instance
+
+runs:
+  using: composite
+  steps:
+    - name: Stop hub process
+      if: always()
+      shell: bash
+      run: |
+        echo "Stopping hub instance..."
+        # Convert to Unix path on Windows, otherwise use as-is
+        if command -v cygpath > /dev/null 2>&1; then
+          RUNNER_TEMP_UNIX=$(cygpath -u "$RUNNER_TEMP")
+        else
+          RUNNER_TEMP_UNIX="$RUNNER_TEMP"
+        fi
+
+        PID_FILE="$RUNNER_TEMP_UNIX/hub.pid"
+        if [ -f "$PID_FILE" ]; then
+          HUB_PID=$(cat "$PID_FILE")
+          if ps -p $HUB_PID > /dev/null 2>&1; then
+            echo "Killing hub process $HUB_PID"
+            kill $HUB_PID || true
+            sleep 2
+            # Force kill if still running
+            if ps -p $HUB_PID > /dev/null 2>&1; then
+              echo "Force killing hub process $HUB_PID"
+              kill -9 $HUB_PID || true
+            fi
+          else
+            echo "Hub process $HUB_PID not running"
+          fi
+        else
+          echo "No hub PID file found at $PID_FILE"
+        fi
+
+    - name: Show hub logs on failure
+      if: failure()
+      shell: bash
+      run: |
+        # Convert to Unix path on Windows, otherwise use as-is
+        if command -v cygpath > /dev/null 2>&1; then
+          RUNNER_TEMP_UNIX=$(cygpath -u "$RUNNER_TEMP")
+        else
+          RUNNER_TEMP_UNIX="$RUNNER_TEMP"
+        fi
+
+        echo "============================================"
+        echo "Hub Logs"
+        echo "============================================"
+        cat "$RUNNER_TEMP_UNIX/hub.log" || echo "No hub logs found"
+
+    - name: Cleanup hub files
+      if: always()
+      shell: bash
+      run: |
+        # Convert to Unix path on Windows, otherwise use as-is
+        if command -v cygpath > /dev/null 2>&1; then
+          RUNNER_TEMP_UNIX=$(cygpath -u "$RUNNER_TEMP")
+        else
+          RUNNER_TEMP_UNIX="$RUNNER_TEMP"
+        fi
+
+        echo "Cleaning up hub files..."
+        rm -f "$RUNNER_TEMP_UNIX/hub.pid" "$RUNNER_TEMP_UNIX/hub.db" "$RUNNER_TEMP_UNIX/hub.log" || true
+        rm -rf "$RUNNER_TEMP_UNIX/tackle2-hub" || true

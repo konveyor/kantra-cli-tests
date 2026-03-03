@@ -1,4 +1,0 @@
-rootProject.name = 'basic-gradle-template'
-
-include 'template-core'
-include 'template-server'

@@ -36,7 +36,7 @@ jobs:
         mkdir $KANTRA_DIR
         docker create --name kantra-download ${{ inputs.image }}:${{ inputs.tag }}
         docker cp kantra-download:/usr/local/bin/kantra $KANTRA_DIR/kantra
-        docker cp kantra-download:/usr/local/bin/windows-kantra $KANTRA_DIR/windows-kantra.exe
+        docker cp kantra-download:/usr/local/bin/windows-kantra $KANTRA_DIR/windows-kantra
         docker cp kantra-download:/usr/local/bin/darwin-kantra $KANTRA_DIR/darwin-kantra
         docker cp kantra-download:/jdtls $KANTRA_DIR/jdtls
         docker cp kantra-download:/bin/fernflower.jar $KANTRA_DIR/fernflower.jar
@@ -62,7 +62,7 @@ jobs:
         mkdir $KANTRA_DIR
         docker create --name kantra-download ${{ inputs.image }}:${{ inputs.tag }}
         docker cp kantra-download:/usr/local/bin/kantra $KANTRA_DIR/kantra
-        docker cp kantra-download:/usr/local/bin/windows-kantra $KANTRA_DIR/windows-kantra.exe
+        docker cp kantra-download:/usr/local/bin/windows-kantra $KANTRA_DIR/windows-kantra
         docker cp kantra-download:/usr/local/bin/darwin-kantra $KANTRA_DIR/darwin-kantra
         docker cp kantra-download:/jdtls $KANTRA_DIR/jdtls
         docker cp kantra-download:/bin/fernflower.jar $KANTRA_DIR/fernflower.jar
@@ -82,44 +82,72 @@ jobs:
     needs: make-kantra-bundle
     steps:
     - uses: actions/checkout@v4
+
+    # NOTE: Hub setup not supported on Windows
+
     - name: Windows container-less tests
       uses: ./.github/actions/tests-windows-containerless
       with:
         tier: ${{ inputs.tier }}
         maven_token: ${{ secrets.GH_TOKEN }}
 
+
   tests-linux-containerless:
     runs-on: ubuntu-latest
     needs: make-kantra-bundle
     steps:
     - uses: actions/checkout@v4
+
+    - name: Setup Hub Instance
+      uses: ./.github/actions/setup-hub
+
     - name: Linux container-less tests
       uses: ./.github/actions/tests-linux-containerless
       with:
         tier: ${{ inputs.tier }}
         maven_token: ${{ secrets.GH_TOKEN }}
 
+    - name: Cleanup Hub Instance
+      if: always()
+      uses: ./.github/actions/cleanup-hub
+
   tests-linux-containers:
     runs-on: ubuntu-latest
     needs: make-kantra-bundle
     steps:
     - uses: actions/checkout@v4
+
+    - name: Setup Hub Instance
+      uses: ./.github/actions/setup-hub
+
     - name: Linux containers tests
       uses: ./.github/actions/tests-linux-containers
       with:
         tier: ${{ inputs.tier }}
         maven_token: ${{ secrets.GH_TOKEN }}
 
+    - name: Cleanup Hub Instance
+      if: always()
+      uses: ./.github/actions/cleanup-hub
+
   tests-linux-containerless-arm64:
     runs-on: ubuntu-22.04-arm
     needs: make-kantra-bundle-arm64
     steps:
     - uses: actions/checkout@v4
+
+    - name: Setup Hub Instance
+      uses: ./.github/actions/setup-hub
+
     - name: Linux container-less tests
       uses: ./.github/actions/tests-linux-containerless-arm64
       with:
         tier: ${{ inputs.tier }}
         maven_token: ${{ secrets.GH_TOKEN }}
+
+    - name: Cleanup Hub Instance
+      if: always()
+      uses: ./.github/actions/cleanup-hub
 
   # Disabled as the env is lower prio, bug was incorrect incidentLine numbers (like 1990 instead of 20)
   #tests-mac-containerless-arm64:
@@ -134,12 +162,20 @@ jobs:
   #      maven_token: ${{ secrets.GH_TOKEN }}
 
   tests-mac-containers:
-    runs-on: macos-13 # Intel, M1-based macos-latest doesn't support nested virtualization (containers)
+    runs-on: macos-15-intel # Intel, M1-based macos-latest doesn't support nested virtualization (containers)
     needs: make-kantra-bundle
     steps:
     - uses: actions/checkout@v4
+
+    - name: Setup Hub Instance
+      uses: ./.github/actions/setup-hub
+
     - name: Mac containers tests
       uses: ./.github/actions/tests-mac-containers
       with:
         tier: ${{ inputs.tier }}
         maven_token: ${{ secrets.GH_TOKEN }}
+
+    - name: Cleanup Hub Instance
+      if: always()
+      uses: ./.github/actions/cleanup-hub

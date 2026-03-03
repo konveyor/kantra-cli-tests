@@ -12,7 +12,7 @@ on:
 
 jobs:
   test-suite:
-    uses: konveyor-ecosystem/kantra-cli-tests/.github/workflows/test-suite.yaml@main
+    uses: konveyor/kantra-cli-tests/.github/workflows/test-suite.yaml@main
     secrets:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
     with:
