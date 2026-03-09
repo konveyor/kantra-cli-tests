@@ -89,6 +89,8 @@ echo "Step 2: Getting or Creating Analysis Profile"
 echo "============================================"
 
 PROFILES_JSON=$(curl --silent --show-error --max-time 10 "${BASE_URL}/analysis/profiles" 2>/dev/null || echo "[]")
+# Ensure PROFILES_JSON is valid JSON array (hub may return HTML/error or different shape when not ready)
+PROFILES_JSON=$(echo "$PROFILES_JSON" | jq -c 'if type == "array" then . else [] end' 2>/dev/null || echo "[]")
 PROFILE_ID=$(echo "$PROFILES_JSON" | jq -r '.[] | select(.name == "profile1") | .id' 2>/dev/null | head -1)
 PROFILE_NAME="profile1"
 
@@ -109,10 +111,11 @@ else
       -d "$PROFILE_PAYLOAD")
     HTTP_BODY=$(echo "$PROFILE_RESPONSE" | head -n -1)
     HTTP_CODE=$(echo "$PROFILE_RESPONSE" | tail -n 1)
-    PROFILE_ID=$(echo "$HTTP_BODY" | jq -r '.id')
+    PROFILE_ID=$(echo "$HTTP_BODY" | jq -r 'if type == "object" and has("id") then .id else empty end' 2>/dev/null | head -1)
     if [ -z "$PROFILE_ID" ] || [ "$PROFILE_ID" = "null" ]; then
         # May already exist; try to get existing
         PROFILES_JSON=$(curl --silent --show-error --max-time 10 "${BASE_URL}/analysis/profiles" 2>/dev/null || echo "[]")
+        PROFILES_JSON=$(echo "$PROFILES_JSON" | jq -c 'if type == "array" then . else [] end' 2>/dev/null || echo "[]")
         PROFILE_ID=$(echo "$PROFILES_JSON" | jq -r '.[] | select(.name == "profile1") | .id' 2>/dev/null | head -1)
     fi
     if [ -z "$PROFILE_ID" ] || [ "$PROFILE_ID" = "null" ]; then
@@ -129,6 +132,7 @@ echo "Step 3: Getting or Creating Application"
 echo "============================================"
 
 APPS_JSON=$(curl --silent --show-error --max-time 10 "${BASE_URL}/applications" 2>/dev/null || echo "[]")
+APPS_JSON=$(echo "$APPS_JSON" | jq -c 'if type == "array" then . else [] end' 2>/dev/null || echo "[]")
 APP_ID=$(echo "$APPS_JSON" | jq -r '.[] | select(.name == "application1") | .id' 2>/dev/null | head -1)
 APP_NAME="application1"
 
@@ -158,9 +162,10 @@ else
       -d "$APP_PAYLOAD")
     HTTP_BODY=$(echo "$APP_RESPONSE" | head -n -1)
     HTTP_CODE=$(echo "$APP_RESPONSE" | tail -n 1)
-    APP_ID=$(echo "$HTTP_BODY" | jq -r '.id')
+    APP_ID=$(echo "$HTTP_BODY" | jq -r 'if type == "object" and has("id") then .id else empty end' 2>/dev/null | head -1)
     if [ -z "$APP_ID" ] || [ "$APP_ID" = "null" ]; then
         APPS_JSON=$(curl --silent --show-error --max-time 10 "${BASE_URL}/applications" 2>/dev/null || echo "[]")
+        APPS_JSON=$(echo "$APPS_JSON" | jq -c 'if type == "array" then . else [] end' 2>/dev/null || echo "[]")
         APP_ID=$(echo "$APPS_JSON" | jq -r '.[] | select(.name == "application1") | .id' 2>/dev/null | head -1)
     fi
     if [ -z "$APP_ID" ] || [ "$APP_ID" = "null" ]; then
@@ -176,6 +181,7 @@ echo "Step 4: Getting or Creating Archetype"
 echo "============================================"
 
 ARCHETYPES_JSON=$(curl --silent --show-error --max-time 10 "${BASE_URL}/archetypes" 2>/dev/null || echo "[]")
+ARCHETYPES_JSON=$(echo "$ARCHETYPES_JSON" | jq -c 'if type == "array" then . else [] end' 2>/dev/null || echo "[]")
 ARCHETYPE_ID=$(echo "$ARCHETYPES_JSON" | jq -r '.[] | select(.name == "archetype1") | .id' 2>/dev/null | head -1)
 ARCHETYPE_NAME="archetype1"
 
@@ -211,17 +217,18 @@ else
       -d "$ARCHETYPE_PAYLOAD")
     HTTP_BODY=$(echo "$ARCHETYPE_RESPONSE" | head -n -1)
     HTTP_CODE=$(echo "$ARCHETYPE_RESPONSE" | tail -n 1)
-    ARCHETYPE_ID=$(echo "$HTTP_BODY" | jq -r '.id')
+    ARCHETYPE_ID=$(echo "$HTTP_BODY" | jq -r 'if type == "object" and has("id") then .id else empty end' 2>/dev/null | head -1)
     if [ -z "$ARCHETYPE_ID" ] || [ "$ARCHETYPE_ID" = "null" ]; then
         ARCHETYPES_JSON=$(curl --silent --show-error --max-time 10 "${BASE_URL}/archetypes" 2>/dev/null || echo "[]")
+        ARCHETYPES_JSON=$(echo "$ARCHETYPES_JSON" | jq -c 'if type == "array" then . else [] end' 2>/dev/null || echo "[]")
         ARCHETYPE_ID=$(echo "$ARCHETYPES_JSON" | jq -r '.[] | select(.name == "archetype1") | .id' 2>/dev/null | head -1)
     fi
     if [ -z "$ARCHETYPE_ID" ] || [ "$ARCHETYPE_ID" = "null" ]; then
         echo "✗ Failed to create or find archetype 'archetype1'"
         exit 1
     fi
-    TARGET_PROFILE_ID=$(echo "$HTTP_BODY" | jq -r '.profiles[0].id')
-    TARGET_PROFILE_NAME=$(echo "$HTTP_BODY" | jq -r '.profiles[0].name')
+    TARGET_PROFILE_ID=$(echo "$HTTP_BODY" | jq -r 'if type == "object" and (.profiles | type == "array") and (.profiles[0] | type == "object") then .profiles[0].id else empty end' 2>/dev/null | head -1)
+    TARGET_PROFILE_NAME=$(echo "$HTTP_BODY" | jq -r 'if type == "object" and (.profiles | type == "array") and (.profiles[0] | type == "object") then .profiles[0].name else empty end' 2>/dev/null | head -1)
     echo "✓ Created archetype 'archetype1' (ID: $ARCHETYPE_ID)"
 fi
 echo "  - Target Profile: ${TARGET_PROFILE_NAME:-TargetProfile1} (ID: $TARGET_PROFILE_ID)"
