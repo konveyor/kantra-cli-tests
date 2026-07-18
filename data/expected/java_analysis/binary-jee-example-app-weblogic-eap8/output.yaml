@@ -1,0 +1,862 @@
+- name: discovery-rules
+  tags:
+  - EJB XML
+  - Java Source
+  - Manifest
+  - Maven XML
+  - Properties
+  - Web XML
+- name: eap7/weblogic/tests/data
+  tags:
+  - WebLogic EAR application descriptor (weblogic-application.xml)
+  - WebLogic JMS descriptor
+  - WebLogic web application descriptor (weblogic.xml)
+  - configuration
+  - jms
+  - web-app
+  - weblogic
+  - webservice
+  violations:
+    weblogic-eap7-016000:
+      category: mandatory
+      description: WebLogic InitialContextFactory
+      effort: 3
+      incidents:
+      - codeSnip: 42        environment.put("java.naming.factory.initial", "weblogic.jndi.WLInitialContextFactory");
+        lineNumber: 42
+        message: "`weblogic.jndi.WLInitialContextFactory` is an implementation of\
+          \ `InitialContextFactory` used to get object instances from JNDI.\n\n The\
+          \ equivalent functionality needs to be configured on JBoss EAP 7 using `org.jboss.naming.remote.client.InitialContextFactory`.\
+          \ Then the context could be instanticated as follows: `InitialContext ctx\
+          \ = new InitialContext();`."
+        uri: src/main/java/com/acme/anvil/listener/AnvilWebLifecycleListener.java
+      - codeSnip: 52        environment.put("java.naming.factory.initial", "weblogic.jndi.WLInitialContextFactory");
+        lineNumber: 52
+        message: "`weblogic.jndi.WLInitialContextFactory` is an implementation of\
+          \ `InitialContextFactory` used to get object instances from JNDI.\n\n The\
+          \ equivalent functionality needs to be configured on JBoss EAP 7 using `org.jboss.naming.remote.client.InitialContextFactory`.\
+          \ Then the context could be instanticated as follows: `InitialContext ctx\
+          \ = new InitialContext();`."
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventPublisher.java
+      labels:
+      - configuration
+      - konveyor.io/source=weblogic
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap7
+      - konveyor.io/target=eap8
+      - weblogic
+      links:
+      - title: Calling JMS resources and EJB in EAP 6 from Weblogic
+        url: https://access.redhat.com/solutions/161543
+      - title: How to configure an EJB client in JBoss EAP 6
+        url: https://access.redhat.com/solutions/396853
+    weblogic-eap7-017000:
+      category: mandatory
+      description: WebLogic T3 JNDI binding
+      effort: 3
+      incidents:
+      - codeSnip: 43        environment.put("java.naming.provider.url", "t3://localhost:7001");
+        lineNumber: 43
+        message: "Weblogic\u2019s implementation of the RMI specification uses a proprietary\
+          \ protocol known as T3. T3S is the version of the protocol over SSL.\n `t3://`\
+          \ and `t3s://` URLs are used to configure a JNDI InitialContext within WebLogic.\n\
+          \n The equivalent functionality needs to be configured in JBoss EAP 7.\n\
+          \ This could be done either by using standard Java EE JNDI names or by using\
+          \ a WebLogic proprietary library if the connectivity to WebLogic server\
+          \ is still required."
+        uri: src/main/java/com/acme/anvil/listener/AnvilWebLifecycleListener.java
+      - codeSnip: 38        env.setProviderUrl("t3://weblogicServer:7001");
+        lineNumber: 38
+        message: "Weblogic\u2019s implementation of the RMI specification uses a proprietary\
+          \ protocol known as T3. T3S is the version of the protocol over SSL.\n `t3://`\
+          \ and `t3s://` URLs are used to configure a JNDI InitialContext within WebLogic.\n\
+          \n The equivalent functionality needs to be configured in JBoss EAP 7.\n\
+          \ This could be done either by using standard Java EE JNDI names or by using\
+          \ a WebLogic proprietary library if the connectivity to WebLogic server\
+          \ is still required."
+        uri: src/main/java/com/acme/anvil/listener/AnvilWebStartupListener.java
+      - codeSnip: 53        environment.put("java.naming.provider.url", "t3://localhost:7001");
+        lineNumber: 53
+        message: "Weblogic\u2019s implementation of the RMI specification uses a proprietary\
+          \ protocol known as T3. T3S is the version of the protocol over SSL.\n `t3://`\
+          \ and `t3s://` URLs are used to configure a JNDI InitialContext within WebLogic.\n\
+          \n The equivalent functionality needs to be configured in JBoss EAP 7.\n\
+          \ This could be done either by using standard Java EE JNDI names or by using\
+          \ a WebLogic proprietary library if the connectivity to WebLogic server\
+          \ is still required."
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventPublisher.java
+      labels:
+      - configuration
+      - konveyor.io/source=weblogic
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap7
+      - konveyor.io/target=eap8
+      - weblogic
+      links:
+      - title: Invoking EJBs deployed on WebLogic from EAP6
+        url: https://access.redhat.com/solutions/1230143
+      - title: Oracle WebLogic RMI with T3
+        url: https://docs.oracle.com/cd/E24329_01/web.1211/e24389/rmi_t3.htm#WLRMI143
+    weblogic-eap7-05000:
+      category: mandatory
+      description: WebLogic TransactionManager usage of resume method
+      effort: 1
+      incidents:
+      - codeSnip: 45           ctm.forceResume(saveTx);
+        lineNumber: 45
+        message: Replace with the Java EE standard method `javax.transaction.TransactionManager.resume(Transaction
+          tx)`.
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventPublisher.java
+      labels:
+      - konveyor.io/source=weblogic
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap7
+      - konveyor.io/target=eap8
+      - transactions
+      - weblogic
+    weblogic-eap7-11000:
+      category: mandatory
+      description: WebLogic proprietary logger (NonCatalogLogger)
+      effort: 1
+      incidents:
+      - codeSnip: 6     public NonCatalogLogger(String name) {
+        lineNumber: 6
+        message: "The WebLogic `NonCatalogLogger` is not supported on JBoss EAP, and\
+          \ should be migrated to a supported logging framework,\n such as the JDK\
+          \ Logger or JBoss Logging:\n\n ```java\n import java.util.logging.Logger;\n\
+          \ Logger LOG = Logger.getLogger(\"MyLogger\");\n ```"
+        uri: src/main/java/weblogic/i18n/logging/NonCatalogLogger.java
+      labels:
+      - konveyor.io/source=weblogic
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap7
+      - konveyor.io/target=eap8
+      - logging
+      - weblogic
+      links:
+      - title: JDK Logging Documentation
+        url: https://docs.oracle.com/javase/7/docs/technotes/guides/logging/overview.html
+      - title: Logging with JBoss EAP
+        url: https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.4/html/configuration_guide/logging_with_jboss_eap
+    weblogic-ejb-01000:
+      category: mandatory
+      description: WebLogic proprietary EJB
+      effort: 1
+      incidents:
+      - codeSnip: 9  import weblogic.ejb.GenericSessionBean;
+        lineNumber: 9
+        message: This application contains WebLogic EJBs probably generated by the
+          WebLogic Server EJB tools.
+        uri: src/main/java/com/acme/anvil/service/ItemLookupBean.java
+      - codeSnip: 11  import weblogic.ejb.GenericMessageDrivenBean;
+        lineNumber: 11
+        message: This application contains WebLogic EJBs probably generated by the
+          WebLogic Server EJB tools.
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventSubscriber.java
+      - codeSnip: 12  import weblogic.ejbgen.MessageDriven;
+        lineNumber: 12
+        message: This application contains WebLogic EJBs probably generated by the
+          WebLogic Server EJB tools.
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventSubscriber.java
+      labels:
+      - ejb
+      - konveyor.io/source=weblogic
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap7+
+      - weblogic
+    weblogic-ejb-03000:
+      category: mandatory
+      description: WebLogic proprietary MessageDriven annotation
+      effort: 3
+      incidents:
+      - codeSnip: 14  @MessageDriven(
+        lineNumber: 14
+        message: This application contains WebLogic proprietary `weblogic.ejbgen.MessageDriven`
+          annotation.
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventSubscriber.java
+      - codeSnip: 10  public @interface MessageDriven {
+        lineNumber: 10
+        message: This application contains WebLogic proprietary `weblogic.ejbgen.MessageDriven`
+          annotation.
+        uri: src/main/java/weblogic/ejbgen/MessageDriven.java
+      labels:
+      - ejb
+      - konveyor.io/source=weblogic
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap7+
+      - weblogic
+      links:
+      - title: JBoss EAP 7 - Configuring MDBs Using Annotations
+        url: https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.0/html-single/developing_ejb_applications/#configuring_mdbs_using_annotations
+      - title: WebLogic EJBGen Annotation Reference
+        url: https://docs.oracle.com/cd/E13222_01/wls/docs92/ejb/EJBGen_reference.html#wp1070171
+    weblogic-ejb-04000:
+      category: mandatory
+      description: WebLogic proprietary EJB Bean
+      effort: 3
+      incidents:
+      - codeSnip: 11  public class ItemLookupBean extends GenericSessionBean implements
+          SessionBean {
+        lineNumber: 11
+        message: This class extends `weblogic.ejb.` that needs to be removed.
+        uri: src/main/java/com/acme/anvil/service/ItemLookupBean.java
+      - codeSnip: 21  public class LogEventSubscriber extends GenericMessageDrivenBean
+          implements MessageDrivenBean, MessageListener {
+        lineNumber: 21
+        message: This class extends `weblogic.ejb.` that needs to be removed.
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventSubscriber.java
+      labels:
+      - ejb
+      - konveyor.io/source=weblogic
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap7+
+      - weblogic
+      links:
+      - title: JBoss EAP 6 - Enterprise JavaBeans
+        url: https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/6.4/html-single/development_guide/#chap-Enterprise_JavaBeans
+      - title: JBoss EAP 7 - Developing EJB Applications
+        url: https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/7.0/html-single/developing_ejb_applications/
+      - title: WebLogic Server - Javadoc
+        url: https://docs.oracle.com/cd/E11035_01/wls100/javadocs/weblogic/ejb/GenericEntityBean.html
+      - title: WebLogic Server - Javadoc
+        url: https://docs.oracle.com/cd/E11035_01/wls100/javadocs/weblogic/ejb/GenericMessageDrivenBean.html
+      - title: WebLogic Server - Javadoc
+        url: https://docs.oracle.com/cd/E11035_01/wls100/javadocs/weblogic/ejb/GenericSessionBean.html
+    weblogic-services-eap7-01000:
+      category: mandatory
+      description: WebLogic Startup Service
+      effort: 3
+      incidents:
+      - codeSnip: 15  public class AnvilWebStartupListener implements T3StartupDef
+          {
+        lineNumber: 15
+        message: Replace this class with a class using the EJB 3.2 `@Singleton` and
+          `@Startup` annotations.
+        uri: src/main/java/com/acme/anvil/listener/AnvilWebStartupListener.java
+      labels:
+      - konveyor.io/source=weblogic
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap7
+      - konveyor.io/target=eap8
+      - startup
+      - weblogic
+      links:
+      - title: EJB 3.2 Singleton Bean
+        url: http://docs.oracle.com/javaee/7/api/javax/ejb/Singleton.html
+      - title: EJB 3.2 Startup Bean
+        url: http://docs.oracle.com/javaee/7/api/javax/ejb/Startup.html
+    weblogic-services-eap7-02000:
+      category: mandatory
+      description: WebLogic T3ServicesDef usage
+      effort: 3
+      incidents:
+      - codeSnip: 10  import weblogic.common.T3ServicesDef;
+        lineNumber: 10
+        message: "`T3ServicesDef` provides access to core services of the container,\
+          \ such as Timers and Logging facilities.\n\n Replace the services provided\
+          \ by this with a Singleton EJB (using the `@Singleton` annotation) that\
+          \ provides access to the equivalent services from JBoss EAP."
+        uri: src/main/java/com/acme/anvil/listener/AnvilWebStartupListener.java
+      - codeSnip: 18     private T3ServicesDef services;
+        lineNumber: 18
+        message: "`T3ServicesDef` provides access to core services of the container,\
+          \ such as Timers and Logging facilities.\n\n Replace the services provided\
+          \ by this with a Singleton EJB (using the `@Singleton` annotation) that\
+          \ provides access to the equivalent services from JBoss EAP."
+        uri: src/main/java/com/acme/anvil/listener/AnvilWebStartupListener.java
+      - codeSnip: 20     public void setServices(T3ServicesDef services) {
+        lineNumber: 20
+        message: "`T3ServicesDef` provides access to core services of the container,\
+          \ such as Timers and Logging facilities.\n\n Replace the services provided\
+          \ by this with a Singleton EJB (using the `@Singleton` annotation) that\
+          \ provides access to the equivalent services from JBoss EAP."
+        uri: src/main/java/com/acme/anvil/listener/AnvilWebStartupListener.java
+      - codeSnip: 3  public interface T3ServicesDef {
+        lineNumber: 3
+        message: "`T3ServicesDef` provides access to core services of the container,\
+          \ such as Timers and Logging facilities.\n\n Replace the services provided\
+          \ by this with a Singleton EJB (using the `@Singleton` annotation) that\
+          \ provides access to the equivalent services from JBoss EAP."
+        uri: src/main/java/weblogic/common/T3ServicesDef.java
+      - codeSnip: 6     void setServices(T3ServicesDef var1);
+        lineNumber: 6
+        message: "`T3ServicesDef` provides access to core services of the container,\
+          \ such as Timers and Logging facilities.\n\n Replace the services provided\
+          \ by this with a Singleton EJB (using the `@Singleton` annotation) that\
+          \ provides access to the equivalent services from JBoss EAP."
+        uri: src/main/java/weblogic/common/T3StartupDef.java
+      labels:
+      - konveyor.io/source=weblogic
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap7
+      - konveyor.io/target=eap8
+      - weblogic
+      - webservice
+      links:
+      - title: Java EE Tutorial - @Singleton Session Bean
+        url: https://docs.oracle.com/javaee/7/tutorial/ejb-intro002.htm#GIPIM
+    weblogic-webapp-eap7-05000:
+      category: mandatory
+      description: WebLogic ApplicationLifecycleEvent
+      effort: 3
+      incidents:
+      - codeSnip: 11  import weblogic.application.ApplicationLifecycleEvent;
+        lineNumber: 11
+        message: "WebLogic `ApplicationLifecycleEvent` must be replaced with standard\
+          \ Java EE `ServletContextEvent`. Otherwise, a custom solution using CDI's\
+          \ `ApplicationScoped` beans or EJB's `@Startup` beans is required in order\
+          \ to propagate a custom event object because `ServletContextEvent` types\
+          \ are not extendible in the standard Java EE programming model.\n\n Use\
+          \ a `javax.servlet.ServletContextListener` with `@javax.annotation.servlet.WebListener`,\
+          \ or an EJB 3.1 `@javax.ejb.Startup` `@javax.ejb.Singleton` service bean."
+        uri: src/main/java/com/acme/anvil/listener/AnvilWebLifecycleListener.java
+      labels:
+      - konveyor.io/source=weblogic
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap7
+      - konveyor.io/target=eap8
+      - lifecycle
+      - web-app
+      - weblogic
+      links:
+      - title: Java EE ServletContextEvent JavaDoc
+        url: http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContextEvent.html
+      - title: Migrate WebLogic ApplicationLifecycleEvent to standard EJB with JBoss
+          EAP
+        url: https://access.redhat.com/articles/1326703
+      - title: WebLogic custom ApplicationLifecycleEvent Documentation
+        url: http://docs.oracle.com/cd/E13222_01/wls/docs90/programming/lifecycle.html
+    weblogic-webapp-eap7-06000:
+      category: mandatory
+      description: WebLogic ApplicationLifecycleListener
+      effort: 3
+      incidents:
+      - codeSnip: 14  public class AnvilWebLifecycleListener extends ApplicationLifecycleListener
+          {
+        lineNumber: 14
+        message: "WebLogic `ApplicationLifecycleListener` must be replaced with standard\
+          \ Java EE `ServletContextListener` types. Otherwise, a solution using CDI's\
+          \ `ApplicationScoped` beans or EJB's `@Startup` beans is required.\n\n Use\
+          \ a `javax.servlet.ServletContextListener` with `@javax.annotation.servlet.WebListener`,\
+          \ or an EJB 3.1 `@javax.ejb.Startup` `@javax.ejb.Singleton` service bean."
+        uri: src/main/java/com/acme/anvil/listener/AnvilWebLifecycleListener.java
+      labels:
+      - konveyor.io/source=weblogic
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap7
+      - konveyor.io/target=eap8
+      - lifecycle
+      - web-app
+      - weblogic
+      links:
+      - title: Java EE ServletContextEvent JavaDoc
+        url: http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContextEvent.html
+      - title: Migrate Oracle WebLogic Server ApplicationLifecycleListener Code to
+          Red Hat JBoss EAP 6+
+        url: https://access.redhat.com/articles/1326703
+      - title: WebLogic custom ApplicationLifecycleEvent Documentation
+        url: http://docs.oracle.com/cd/E13222_01/wls/docs90/programming/lifecycle.html
+    weblogic-webapp-eap7-07000:
+      category: mandatory
+      description: WebLogic proprietary security API
+      effort: 3
+      incidents:
+      - codeSnip: 12  import weblogic.security.acl.UserInfo;
+        lineNumber: 12
+        message: The usage of the WebLogic proprietary security API should be replaced
+          by standard Java EE mechanisms or the ones provided by JBoss EAP.
+        uri: src/main/java/weblogic/jndi/Environment.java
+      - codeSnip: 10  import weblogic.security.services.AppContext;
+        lineNumber: 10
+        message: The usage of the WebLogic proprietary security API should be replaced
+          by standard Java EE mechanisms or the ones provided by JBoss EAP.
+        uri: src/main/java/weblogic/servlet/security/ServletAuthentication.java
+      labels:
+      - konveyor.io/source=weblogic
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap7
+      - konveyor.io/target=eap8
+      - security
+      - web-app
+      - weblogic
+    weblogic-webapp-eap7-09000:
+      category: mandatory
+      description: WebLogic proprietary ServletAuthentication annotation
+      effort: 3
+      incidents:
+      - codeSnip: 15  import weblogic.servlet.security.ServletAuthentication;
+        lineNumber: 15
+        message: "Oracle WebLogic Server provides a proprietary `ServletAuthentication`\
+          \ class to perform programmatic login.\n\n In Red Hat JBoss EAP 7, you can\
+          \ use the standard Java EE servlet security 3.1 `HttpServletRequest.login()`\
+          \ method or you can define a `<security-constraint>` element in the web.xml\
+          \ file. You must also replace code that uses the Oracle WebLogic Server\
+          \ proprietary `ServletAuthentication` class."
+        uri: src/main/java/com/acme/anvil/AuthenticateFilter.java
+      - codeSnip: 30           ServletAuthentication.invalidateAll(request);
+        lineNumber: 30
+        message: "Oracle WebLogic Server provides a proprietary `ServletAuthentication`\
+          \ class to perform programmatic login.\n\n In Red Hat JBoss EAP 7, you can\
+          \ use the standard Java EE servlet security 3.1 `HttpServletRequest.login()`\
+          \ method or you can define a `<security-constraint>` element in the web.xml\
+          \ file. You must also replace code that uses the Oracle WebLogic Server\
+          \ proprietary `ServletAuthentication` class."
+        uri: src/main/java/com/acme/anvil/AuthenticateFilter.java
+      - codeSnip: 36              ServletAuthentication.invalidateAll(request);
+        lineNumber: 36
+        message: "Oracle WebLogic Server provides a proprietary `ServletAuthentication`\
+          \ class to perform programmatic login.\n\n In Red Hat JBoss EAP 7, you can\
+          \ use the standard Java EE servlet security 3.1 `HttpServletRequest.login()`\
+          \ method or you can define a `<security-constraint>` element in the web.xml\
+          \ file. You must also replace code that uses the Oracle WebLogic Server\
+          \ proprietary `ServletAuthentication` class."
+        uri: src/main/java/com/acme/anvil/AuthenticateFilter.java
+      - codeSnip: 12  public class ServletAuthentication {
+        lineNumber: 12
+        message: "Oracle WebLogic Server provides a proprietary `ServletAuthentication`\
+          \ class to perform programmatic login.\n\n In Red Hat JBoss EAP 7, you can\
+          \ use the standard Java EE servlet security 3.1 `HttpServletRequest.login()`\
+          \ method or you can define a `<security-constraint>` element in the web.xml\
+          \ file. You must also replace code that uses the Oracle WebLogic Server\
+          \ proprietary `ServletAuthentication` class."
+        uri: src/main/java/weblogic/servlet/security/ServletAuthentication.java
+      labels:
+      - konveyor.io/source=weblogic
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap7
+      - konveyor.io/target=eap8
+      - security
+      - web-app
+      - weblogic
+      links:
+      - title: Migrate Oracle WebLogic programmatic login to JBoss EAP 7
+        url: https://access.redhat.com/articles/1329213
+    weblogic-xml-descriptor-19000:
+      category: mandatory
+      description: WebLogic EJB XML (weblogic-ejb-jar.xml) trans-timeout-seconds
+      effort: 3
+      incidents:
+      - codeSnip: "9  \t\t\t<trans-timeout-seconds>180</trans-timeout-seconds>"
+        lineNumber: 9
+        message: "The WebLogic `<trans-timeout-seconds>` configuration element sets\
+          \ the maximum duration for an EJB's container-initiated transactions, in\
+          \ seconds, after which the transaction is rolled back. \n\n In JBoss EAP\
+          \ 6+, you can achieve the same behavior by using the `TransactionTimeout`\
+          \ annotation."
+        uri: binary-exploded/META-INF/weblogic-ejb-jar.xml
+      labels:
+      - configuration
+      - database
+      - descriptor
+      - ejb
+      - konveyor.io/source=weblogic
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap7
+      - konveyor.io/target=eap8
+      - weblogic
+      links:
+      - title: How to set EJB transaction timeout in JBoss EAP 6
+        url: https://access.redhat.com/solutions/90553
+      - title: JBoss EAP 6 - Session Bean Transaction Timeout
+        url: https://access.redhat.com/documentation/en-us/red_hat_jboss_enterprise_application_platform/6.4/html-single/administration_and_configuration_guide/#Session_Bean_Transaction_Timeout
+      - title: WebLogic Server Deployment Elements
+        url: https://docs.oracle.com/middleware/1221/wls/WLMDB/summary.htm#r35c1-t4
+    weblogic-xml-descriptor-eap7-04000:
+      category: mandatory
+      description: WebLogic EJB XML (weblogic-ejb-jar.xml)
+      effort: 3
+      incidents:
+      - codeSnip: "5  \t\t<ejb-name>ItemLookupBean</ejb-name>"
+        lineNumber: 5
+        message: The elements of proprietary `weblogic-ejb-jar.xml` descriptor need
+          to be mapped to the `jboss-ejb3.xml` one according to the attached knowledge
+          article.
+        uri: binary-exploded/META-INF/weblogic-ejb-jar.xml
+      labels:
+      - configuration
+      - descriptor
+      - ejb
+      - konveyor.io/source=weblogic
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap7
+      - konveyor.io/target=eap8
+      - weblogic
+      links:
+      - title: Migrate the weblogic-ejb-jar.xml
+        url: https://access.redhat.com/articles/1326823
+- description: This ruleset provides analysis of Java EE applications that need to
+    change certain CDI-related method calls.
+  name: eap8/eap7
+  violations:
+    javax-to-jakarta-dependencies-00001:
+      category: mandatory
+      description: The 'javax' groupId has been replaced by 'jakarta' group id in
+        dependencies.
+      effort: 1
+      incidents:
+      - codeSnip: "23  \t\t\t<groupId>javax.ejb</groupId>"
+        lineNumber: 23
+        message: Update the group dependency by replacing the `javax.` groupId with
+          `jakarta.`
+        uri: binary-exploded/META-INF/maven/org.windup.example/jee-example-services/pom.xml
+      - codeSnip: "16    \t\t<groupId>javax.servlet</groupId>"
+        lineNumber: 16
+        message: Update the group dependency by replacing the `javax.` groupId with
+          `jakarta.`
+        uri: binary-exploded/META-INF/maven/org.migration.support/migration-support/pom.xml
+      - codeSnip: "22    \t\t<groupId>javax.ejb</groupId>"
+        lineNumber: 22
+        message: Update the group dependency by replacing the `javax.` groupId with
+          `jakarta.`
+        uri: binary-exploded/META-INF/maven/org.migration.support/migration-support/pom.xml
+      labels:
+      - konveyor.io/source
+      - konveyor.io/source=spring5
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap8
+      - konveyor.io/target=jakarta-ee
+      - konveyor.io/target=jakarta-ee9+
+      - konveyor.io/target=jws
+      - konveyor.io/target=jws6+
+      - konveyor.io/target=spring6+
+      links:
+      - title: Jakarta EE
+        url: https://jakarta.ee/
+    javax-to-jakarta-dependencies-00007:
+      category: mandatory
+      description: javax javaee-api artifactId has been replaced by jakarta.platform
+        jakarta.jakartaee-api
+      effort: 1
+      incidents:
+      - codeSnip: "30  \t\t\t<artifactId>javaee-api</artifactId>"
+        lineNumber: 30
+        message: Update artifact dependency by replacing the `javaee-api` artifactId
+          with `jakarta.jakartaee-api`
+        uri: binary-exploded/META-INF/maven/org.windup.example/jee-example-services/pom.xml
+      - codeSnip: "20    \t\t<artifactId>javaee-api</artifactId>"
+        lineNumber: 20
+        message: Update artifact dependency by replacing the `javaee-api` artifactId
+          with `jakarta.jakartaee-api`
+        uri: binary-exploded/META-INF/maven/org.windup.example/jee-example-web/pom.xml
+      - codeSnip: "29    \t\t<artifactId>javaee-api</artifactId>"
+        lineNumber: 29
+        message: Update artifact dependency by replacing the `javaee-api` artifactId
+          with `jakarta.jakartaee-api`
+        uri: binary-exploded/META-INF/maven/org.migration.support/migration-support/pom.xml
+      labels:
+      - konveyor.io/source
+      - konveyor.io/source=spring5
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap8
+      - konveyor.io/target=jakarta-ee
+      - konveyor.io/target=jakarta-ee9+
+      - konveyor.io/target=jws
+      - konveyor.io/target=jws6+
+      - konveyor.io/target=spring6+
+      links:
+      - title: Jakarta EE
+        url: https://jakarta.ee/
+    javax-to-jakarta-import-00001:
+      category: mandatory
+      description: The package 'javax' has been replaced by 'jakarta'.
+      effort: 1
+      incidents:
+      - codeSnip: 6  import javax.ejb.CreateException;
+        lineNumber: 6
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/AnvilWebServlet.java
+      - codeSnip: 7  import javax.ejb.EJBException;
+        lineNumber: 7
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/AnvilWebServlet.java
+      - codeSnip: 10  import javax.servlet.ServletException;
+        lineNumber: 10
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/AnvilWebServlet.java
+      - codeSnip: 11  import javax.servlet.http.HttpServlet;
+        lineNumber: 11
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/AnvilWebServlet.java
+      - codeSnip: 12  import javax.servlet.http.HttpServletRequest;
+        lineNumber: 12
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/AnvilWebServlet.java
+      - codeSnip: 13  import javax.servlet.http.HttpServletResponse;
+        lineNumber: 13
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/AnvilWebServlet.java
+      - codeSnip: 5  import javax.servlet.Filter;
+        lineNumber: 5
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/AuthenticateFilter.java
+      - codeSnip: 6  import javax.servlet.FilterChain;
+        lineNumber: 6
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/AuthenticateFilter.java
+      - codeSnip: 7  import javax.servlet.FilterConfig;
+        lineNumber: 7
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/AuthenticateFilter.java
+      - codeSnip: 8  import javax.servlet.ServletException;
+        lineNumber: 8
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/AuthenticateFilter.java
+      - codeSnip: 9  import javax.servlet.ServletRequest;
+        lineNumber: 9
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/AuthenticateFilter.java
+      - codeSnip: 10  import javax.servlet.ServletResponse;
+        lineNumber: 10
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/AuthenticateFilter.java
+      - codeSnip: 11  import javax.servlet.http.HttpServletRequest;
+        lineNumber: 11
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/AuthenticateFilter.java
+      - codeSnip: 12  import javax.servlet.http.HttpSession;
+        lineNumber: 12
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/AuthenticateFilter.java
+      - codeSnip: 4  import javax.servlet.Filter;
+        lineNumber: 4
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/LoginFilter.java
+      - codeSnip: 5  import javax.servlet.FilterChain;
+        lineNumber: 5
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/LoginFilter.java
+      - codeSnip: 6  import javax.servlet.FilterConfig;
+        lineNumber: 6
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/LoginFilter.java
+      - codeSnip: 7  import javax.servlet.ServletException;
+        lineNumber: 7
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/LoginFilter.java
+      - codeSnip: 8  import javax.servlet.ServletRequest;
+        lineNumber: 8
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/LoginFilter.java
+      - codeSnip: 9  import javax.servlet.ServletResponse;
+        lineNumber: 9
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/LoginFilter.java
+      - codeSnip: 10  import javax.servlet.http.HttpServletRequest;
+        lineNumber: 10
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/LoginFilter.java
+      - codeSnip: 11  import javax.servlet.http.HttpServletResponse;
+        lineNumber: 11
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/LoginFilter.java
+      - codeSnip: 12  import javax.servlet.http.HttpSession;
+        lineNumber: 12
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/com/acme/anvil/LoginFilter.java
+      - codeSnip: 7  import javax.ejb.SessionBean;
+        lineNumber: 7
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ItemLookupBean.java
+      - codeSnip: 4  import javax.ejb.CreateException;
+        lineNumber: 4
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ItemLookupHome.java
+      - codeSnip: 5  import javax.ejb.EJBException;
+        lineNumber: 5
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ItemLookupHome.java
+      - codeSnip: 6  import javax.ejb.EJBHome;
+        lineNumber: 6
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ItemLookupHome.java
+      - codeSnip: 4  import javax.ejb.EJBLocalObject;
+        lineNumber: 4
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ItemLookupLocal.java
+      - codeSnip: 3  import javax.ejb.CreateException;
+        lineNumber: 3
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ItemLookupLocalHome.java
+      - codeSnip: 4  import javax.ejb.EJBException;
+        lineNumber: 4
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ItemLookupLocalHome.java
+      - codeSnip: 5  import javax.ejb.EJBLocalHome;
+        lineNumber: 5
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ItemLookupLocalHome.java
+      - codeSnip: 3  import javax.ejb.EJBObject;
+        lineNumber: 3
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ProductCatalog.java
+      - codeSnip: 4  import javax.ejb.EJBException;
+        lineNumber: 4
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ProductCatalogBean.java
+      - codeSnip: 5  import javax.ejb.SessionBean;
+        lineNumber: 5
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ProductCatalogBean.java
+      - codeSnip: 6  import javax.ejb.SessionContext;
+        lineNumber: 6
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ProductCatalogBean.java
+      - codeSnip: 4  import javax.ejb.CreateException;
+        lineNumber: 4
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ProductCatalogHome.java
+      - codeSnip: 5  import javax.ejb.EJBException;
+        lineNumber: 5
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ProductCatalogHome.java
+      - codeSnip: 6  import javax.ejb.EJBHome;
+        lineNumber: 6
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ProductCatalogHome.java
+      - codeSnip: 3  import javax.ejb.EJBLocalObject;
+        lineNumber: 3
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ProductCatalogLocal.java
+      - codeSnip: 3  import javax.ejb.CreateException;
+        lineNumber: 3
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ProductCatalogLocalHome.java
+      - codeSnip: 4  import javax.ejb.EJBException;
+        lineNumber: 4
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ProductCatalogLocalHome.java
+      - codeSnip: 5  import javax.ejb.EJBLocalHome;
+        lineNumber: 5
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/ProductCatalogLocalHome.java
+      - codeSnip: 5  import javax.jms.JMSException;
+        lineNumber: 5
+        message: Replace the `javax.jms` import statement with `jakarta.jms`
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventPublisher.java
+      - codeSnip: 6  import javax.jms.ObjectMessage;
+        lineNumber: 6
+        message: Replace the `javax.jms` import statement with `jakarta.jms`
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventPublisher.java
+      - codeSnip: 7  import javax.jms.Queue;
+        lineNumber: 7
+        message: Replace the `javax.jms` import statement with `jakarta.jms`
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventPublisher.java
+      - codeSnip: 8  import javax.jms.QueueConnection;
+        lineNumber: 8
+        message: Replace the `javax.jms` import statement with `jakarta.jms`
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventPublisher.java
+      - codeSnip: 9  import javax.jms.QueueConnectionFactory;
+        lineNumber: 9
+        message: Replace the `javax.jms` import statement with `jakarta.jms`
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventPublisher.java
+      - codeSnip: 10  import javax.jms.QueueSender;
+        lineNumber: 10
+        message: Replace the `javax.jms` import statement with `jakarta.jms`
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventPublisher.java
+      - codeSnip: 11  import javax.jms.QueueSession;
+        lineNumber: 11
+        message: Replace the `javax.jms` import statement with `jakarta.jms`
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventPublisher.java
+      - codeSnip: 5  import javax.ejb.MessageDrivenBean;
+        lineNumber: 5
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventSubscriber.java
+      - codeSnip: 6  import javax.jms.JMSException;
+        lineNumber: 6
+        message: Replace the `javax.jms` import statement with `jakarta.jms`
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventSubscriber.java
+      - codeSnip: 7  import javax.jms.Message;
+        lineNumber: 7
+        message: Replace the `javax.jms` import statement with `jakarta.jms`
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventSubscriber.java
+      - codeSnip: 8  import javax.jms.MessageListener;
+        lineNumber: 8
+        message: Replace the `javax.jms` import statement with `jakarta.jms`
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventSubscriber.java
+      - codeSnip: 9  import javax.jms.ObjectMessage;
+        lineNumber: 9
+        message: Replace the `javax.jms` import statement with `jakarta.jms`
+        uri: src/main/java/com/acme/anvil/service/jms/LogEventSubscriber.java
+      - codeSnip: 3  import javax.ejb.MessageDrivenContext;
+        lineNumber: 3
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/weblogic/ejb/GenericMessageDrivenBean.java
+      - codeSnip: 3  import javax.ejb.SessionContext;
+        lineNumber: 3
+        message: Replace the `javax.ejb` import statement with `jakarta.ejb`
+        uri: src/main/java/weblogic/ejb/GenericSessionBean.java
+      - codeSnip: 3  import javax.security.auth.Subject;
+        lineNumber: 3
+        message: Replace the `javax.security` import statement with `jakarta.security`
+        uri: src/main/java/weblogic/servlet/security/ServletAuthentication.java
+      - codeSnip: 4  import javax.security.auth.callback.CallbackHandler;
+        lineNumber: 4
+        message: Replace the `javax.security` import statement with `jakarta.security`
+        uri: src/main/java/weblogic/servlet/security/ServletAuthentication.java
+      - codeSnip: 5  import javax.servlet.http.Cookie;
+        lineNumber: 5
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/weblogic/servlet/security/ServletAuthentication.java
+      - codeSnip: 6  import javax.servlet.http.HttpServletRequest;
+        lineNumber: 6
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/weblogic/servlet/security/ServletAuthentication.java
+      - codeSnip: 7  import javax.servlet.http.HttpServletResponse;
+        lineNumber: 7
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/weblogic/servlet/security/ServletAuthentication.java
+      - codeSnip: 8  import javax.servlet.http.HttpSession;
+        lineNumber: 8
+        message: Replace the `javax.servlet` import statement with `jakarta.servlet`
+        uri: src/main/java/weblogic/servlet/security/ServletAuthentication.java
+      - codeSnip: 3  import javax.transaction.xa.Xid;
+        lineNumber: 3
+        message: Replace the `javax.transaction` import statement with `jakarta.transaction`
+        uri: src/main/java/weblogic/transaction/InterposedTransactionManager.java
+      - codeSnip: 5  import javax.transaction.xa.Xid;
+        lineNumber: 5
+        message: Replace the `javax.transaction` import statement with `jakarta.transaction`
+        uri: src/main/java/weblogic/transaction/Transaction.java
+      - codeSnip: 4  import javax.transaction.xa.Xid;
+        lineNumber: 4
+        message: Replace the `javax.transaction` import statement with `jakarta.transaction`
+        uri: src/main/java/weblogic/transaction/TransactionManager.java
+      - codeSnip: 4  import javax.transaction.xa.Xid;
+        lineNumber: 4
+        message: Replace the `javax.transaction` import statement with `jakarta.transaction`
+        uri: src/main/java/weblogic/transaction/TxHelper.java
+      labels:
+      - konveyor.io/source
+      - konveyor.io/source=spring5
+      - konveyor.io/target=eap
+      - konveyor.io/target=eap8
+      - konveyor.io/target=jakarta-ee
+      - konveyor.io/target=jakarta-ee9+
+      - konveyor.io/target=jws
+      - konveyor.io/target=jws6+
+      - konveyor.io/target=spring6+
+- description: This ruleset provides analysis of logging libraries.
+  name: technology-usage
+  tags:
+  - Apache Log4J
+  - Bean=EJB XML
+  - Connect=EAR Deployment
+  - Connect=EJB XML
+  - Connect=Servlet
+  - EAR
+  - Embedded library - Apache Log4J
+  - Embedded=Properties
+  - HTTP=Servlet
+  - JSF XML
+  - Java EE Application Deployment
+  - Java EE=EAR Deployment
+  - Java EE=EJB XML
+  - Java EE=JSF XML
+  - Java EE=Servlet
+  - Java Servlet
+  - Other=EAR Deployment
+  - Other=Properties
+  - Servlet
+  - Sustain=Properties
+  - View=JSF XML
+  - Web=JSF XML

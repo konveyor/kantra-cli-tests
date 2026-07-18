@@ -1,0 +1,38 @@
+- dependencies:
+  - labels:
+    - konveyor.io/dep-source=internal
+    - konveyor.io/language=java
+    name: org.windup.example.jee-example-services
+    prefix: m2/repository/org/windup/example/jee-example-services/1.0.0
+    version: 1.0.0
+  fileURI: binary-exploded/jee-example-services-decompiled/jee-example-services.jar/jee-example-services.jar
+  provider: java
+- dependencies:
+  - labels:
+    - konveyor.io/dep-source=internal
+    - konveyor.io/language=java
+    name: org.migration.support.migration-support
+    prefix: m2/repository/org/migration/support/migration-support/1.0.0
+    version: 1.0.0
+  fileURI: binary-exploded/WEB-INF/lib/WEB-INF/lib/migration-support-1.0.0-decompiled/migration-support-1.0.0.jar/migration-support-1.0.0.jar
+  provider: java
+- dependencies:
+  - labels:
+    - konveyor.io/dep-source=open-source
+    - konveyor.io/language=java
+    name: commons-lang.commons-lang
+    prefix: m2/repository/commons-lang/commons-lang/2.5
+    resolvedIdentifier: b0236b252e86419eef20c31a44579d2aee2f0a69
+    version: '2.5'
+  fileURI: binary-exploded/WEB-INF/lib/commons-lang-2.5.jar/commons-lang-2.5.jar
+  provider: java
+- dependencies:
+  - labels:
+    - konveyor.io/dep-source=open-source
+    - konveyor.io/language=java
+    name: log4j.log4j
+    prefix: m2/repository/log4j/log4j/1.2.6
+    resolvedIdentifier: 4bf32b10f459a4ecd4df234ae2ccb32b9d9ba9b7
+    version: 1.2.6
+  fileURI: binary-exploded/WEB-INF/lib/log4j-1.2.6.jar/log4j-1.2.6.jar
+  provider: java

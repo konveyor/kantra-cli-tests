@@ -45,6 +45,18 @@ class TestTrimMethods(unittest.TestCase):
             "C://Users//runneradmin//.m2//repository//io//konveyor//demo//configuration-utils//1.0.0//io//konveyor//demo//config//ApplicationConfiguration.java",
             "",
             "m2/repository/io/konveyor/demo/configuration-utils/1.0.0/io/konveyor/demo/config/ApplicationConfiguration.java"
+        ],
+        [
+            # binary java-project
+            "/opt/input/something/java-project-dGGptYWPwMpfixya/src/main/java/weblogic/transaction/TxHelper.java",
+            "",
+            "src/main/java/weblogic/transaction/TxHelper.java"
+        ],
+        [
+            # binary exploded
+            "/tmp/java-project/jee-example-services-jar-exploded/META-INF/weblogic-ejb-jar.xml",
+            "",
+            "binary-exploded/META-INF/weblogic-ejb-jar.xml"
         ]
     ]
 

@@ -190,9 +190,10 @@ def trim_incident_uri(uri, input_root_path):
     uri = uri.replace("file:///", "")
     uri = uri.replace("file://", "")
 
-    # Remove all path prefix to java-project or maven repo if present
-    uri = str_path_remove_prefix(uri, 'java-project')
-    uri = str_path_remove_prefix(uri, 'm2/repository')
+    # Remove all path prefix to java-project, maven repo or exploded binary if present
+    uri = str_path_remove_prefix(uri, r'java-project-?[a-zA-Z]*/', '')
+    uri = str_path_remove_prefix(uri, 'm2/repository', 'm2/repository')
+    uri = str_path_remove_prefix(uri, r'exploded-?[a-z]*', 'binary-exploded')
 
     # Ensure there is no / prefix
     if uri.startswith('/'):
@@ -200,8 +201,8 @@ def trim_incident_uri(uri, input_root_path):
 
     return uri
 
-def str_path_remove_prefix(s, root):
-    if root in s:
-        return root + s.split(root)[-1]
+def str_path_remove_prefix(s, root, replacement = ''):
+    if re.search(root, s):
+        return replacement + re.split(root, s)[-1]
     else:
         return s

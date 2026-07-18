@@ -9,5 +9,16 @@
           "linux"
       ],
       "settings": "data/xml/tackle-testapp-public-settings.xml"
+  },
+  "binary-jee-example-app-weblogic-eap8": {
+      "input": {
+        "local": "jee-example-app-1.0.0.ear"
+      },
+      "sources": [
+        "weblogic"
+      ],
+      "targets": [
+          "eap8"
+      ]
   }
 }
