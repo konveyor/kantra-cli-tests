@@ -273,6 +273,47 @@ def build_platform_discovery_command(organizations, config, spaces=None, app_nam
     print(command)
     return command
 
+def build_platform_local_discovery_command(manifest_file, output_dir=None, **kwargs):
+    """
+        Builds a string for executing the "discover cloud-foundry" subcommand for offline discovery
+
+        Args:
+            manifest_file (str): Path to the Cloud Foundry manifest file.
+            output_dir (str, optional): Directory path for discovery output.
+            **kwargs (str): Optional keyword arguments to be passed to Kantra as additional options.
+                this argument takes a dict, where each key is the argument, which can be passed with or without the '--'
+
+        Returns:
+            str: The full command to execute with the specified options and arguments.
+
+        Raises:
+            Exception: If required parameters are not provided.
+    """
+    kantra_path = get_cli_path()
+
+    if not manifest_file:
+        raise Exception('Manifest file is required')
+
+    if not os.path.exists(manifest_file):
+        raise Exception(f"Manifest file does not exist: {manifest_file}")
+
+    command = kantra_path + ' discover cloud-foundry --input=' + manifest_file
+
+    if output_dir:
+        command += ' --output-dir=' + output_dir
+
+    # Add any additional kwargs
+    for key, value in kwargs.items():
+        if '--' not in key:
+            key = '--' + key
+        command += ' ' + key
+
+        if value:
+            command += '=' + value
+
+    print(command)
+    return command
+
 def build_asset_generation_command(input_file, chart_dir, output_dir=None, **kwargs):
     """
         Builds a string for executing the "mta-cli generate helm" subcommand

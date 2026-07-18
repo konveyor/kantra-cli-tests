@@ -1,0 +1,41 @@
+# Values file for hello-spring-cloud
+# Generated from Cloud Foundry manifest via Konveyor Discovery
+
+# Port configuration
+portName: 8080-tcp
+port: 8080
+
+# Deployment strategy
+deploymentStrategy:
+  type: RollingUpdate
+  rollingMaxSurge: 25%
+  rollingMaxUnavailable: 20%
+
+# Image configuration
+image:
+  registry: image-registry.openshift-image-registry.svc:5000
+  pullPolicy: Always
+  tag: latest
+
+# Service account configuration
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Konveyor Discovery Manifest data
+manifest:
+  name: hello-spring-cloud
+  randomRoute: true
+  processes:
+    - type: web
+      healthCheck:
+        invocationTimeout: 1
+        interval: 30
+        type: port
+        timeout: 60
+      readinessCheck:
+        type: process
+      instances: 1
+      memory: 1Gi
+  path: target/hello-spring-cloud-0.0.1.BUILD-SNAPSHOT.jar
