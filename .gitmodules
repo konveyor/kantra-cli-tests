@@ -1,6 +1,6 @@
 [submodule "data/applications/book-server"]
 	path = data/applications/book-server
-	url = https://github.com/ibraginsky/book-server
+	url = https://github.com/ibragins/book-server
 	branch = main
 [submodule "data/ci"]
 	path = data/ci

@@ -38,6 +38,29 @@ hub_auth_url() {
     fi
 }
 
+hub_resource_urls() {
+    local base="${1%/}" path="${2#/}"
+    if [[ "$base" == */hub ]]; then
+        echo "${base}/${path}"
+    else
+        echo "${base}/${path}"
+        echo "${base}/hub/${path}"
+    fi
+}
+
+hub_allows_anonymous_api() {
+    local url http_code body
+    for url in $(hub_resource_urls "$BASE_URL" targets); do
+        body=$(curl "${CURL_TLS_OPTS[@]}" -sS --connect-timeout 3 --max-time 15 -w "\n%{http_code}" "$url" 2>/dev/null || echo -e "\n000")
+        http_code=$(echo "$body" | tail -n1)
+        body=$(echo "$body" | sed '$d')
+        if [ "$http_code" = "200" ] && echo "$body" | jq -e 'type == "array"' >/dev/null 2>&1; then
+            return 0
+        fi
+    done
+    return 1
+}
+
 obtain_hub_token() {
     if [ -n "${HUB_TOKEN:-}" ]; then
         echo "Using provided HUB_TOKEN" >&2
@@ -67,6 +90,12 @@ obtain_hub_token() {
             return 0
         fi
     done
+
+    if hub_allows_anonymous_api; then
+        echo "Hub auth not required; proceeding without API token" >&2
+        echo ""
+        return 0
+    fi
 
     echo "✗ Failed to authenticate against Hub" >&2
     echo "Last response: $response" >&2
@@ -100,7 +129,8 @@ check_hub_ready() {
 check_hub_ready
 
 HUB_TOKEN=$(obtain_hub_token)
-CURL_OPTS=("${CURL_TLS_OPTS[@]}" --silent --show-error --max-time 15 -H "Authorization: Bearer ${HUB_TOKEN}")
+CURL_OPTS=("${CURL_TLS_OPTS[@]}" --silent --show-error --max-time 15)
+[ -n "$HUB_TOKEN" ] && CURL_OPTS+=(-H "Authorization: Bearer ${HUB_TOKEN}")
 
 TARGETS_JSON=$(curl "${CURL_OPTS[@]}" "${BASE_URL}/targets" 2>/dev/null || echo "[]")
 TARGETS_LEN=$(echo "$TARGETS_JSON" | jq -r 'if type == "array" then length else 0 end' 2>/dev/null || echo "0")
@@ -246,7 +276,8 @@ echo "============================================"
 echo "Verification"
 echo "============================================"
 
-CURL_VERIFY_OPTS=("${CURL_TLS_OPTS[@]}" --fail --silent --show-error --connect-timeout 5 --max-time 10 -H "Authorization: Bearer ${HUB_TOKEN}")
+CURL_VERIFY_OPTS=("${CURL_TLS_OPTS[@]}" --fail --silent --show-error --connect-timeout 5 --max-time 10)
+[ -n "$HUB_TOKEN" ] && CURL_VERIFY_OPTS+=(-H "Authorization: Bearer ${HUB_TOKEN}")
 
 echo ""
 echo "Applications:"
