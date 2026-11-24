@@ -5,16 +5,13 @@ import subprocess
 import zipfile
 
 import pytest
-import yaml
-from jsonschema.exceptions import ValidationError
 
-from utils import constants
-from jsonschema import validate
+from utils.common import get_project_path, get_report_path, get_cli_path
 
 
 # Polarion TC 376
 # TODO Kantra transform runs in a container that does "cp -r /opt/input /tmp/source-app"
-# and hits "Permission denied" Remove skip when Kantra fixes 
+# and hits "Permission denied" Remove skip when Kantra fixes
 @pytest.mark.skipif(
     os.environ.get("CI") == "true",
     reason="Kantra transform container has /tmp permission denied (cp to /tmp/source-app); skip in CI until fixed",
@@ -22,18 +19,27 @@ from jsonschema import validate
 @pytest.mark.parametrize('transformation_name', json.load(open("data/openrewrite_transformation.json")))
 def test_transform_code_with_openrewrite(transformation_name, openrewrite_transformation_data):
     application_data = openrewrite_transformation_data[transformation_name]
-    kantra_path = os.getenv(constants.KANTRA_CLI_PATH)
-    extraction_path = os.getenv(constants.REPORT_OUTPUT_PATH)
+    kantra_path = get_cli_path()
+    extraction_path = get_report_path()
 
     shutil.rmtree(extraction_path)
 
-    application_path = os.path.join(os.getenv(constants.PROJECT_PATH), 'data/applications', application_data['file_name'])
-    extracted_app_path = os.path.join(os.getenv(constants.REPORT_OUTPUT_PATH), application_data['app_name'])
+    application_path = os.path.join(
+        get_project_path(),
+        'data',
+        'applications',
+        application_data['file_name']
+        )
+    extracted_app_path = os.path.join(
+        get_report_path(),
+        application_data['app_name']
+          )
 
     with zipfile.ZipFile(application_path, 'r') as zip_ref:
         zip_ref.extractall(extraction_path)
 
-    command = f"{kantra_path} transform openrewrite --input {extracted_app_path} --target {application_data['targets']}"
+    command = f"{kantra_path} openrewrite --input {extracted_app_path} --target {application_data['targets']}"
+    print(command)
 
     output = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, encoding='utf-8').stdout
     assert 'BUILD SUCCESS' in output, "Failed command is: " + command
