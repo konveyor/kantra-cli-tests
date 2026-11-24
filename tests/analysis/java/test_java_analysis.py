@@ -94,7 +94,7 @@ def test_gradle_analysis_custom_rule():
             'rules': custom_rules_path,
             'enable-default-rulesets': 'false',
             'analyze-known-libraries': None,
-            'run-local': 'false'
+            'run-local': 'true'
         },
     )
 
@@ -108,9 +108,8 @@ def test_gradle_analysis_custom_rule():
 
 def test_dependency_rule_analysis(analysis_data):
     application_data = analysis_data['tackle-testapp-project']
-    project_path = os.getenv(constants.PROJECT_PATH)
-    settings_template = os.path.join(project_path, 'data/xml', 'tackle-testapp-public-settings.xml')
-    custom_rule_path = os.path.join(project_path, 'data/yaml', 'tackle-dependency-custom-rule.yaml')
+    settings_template = os.path.join(get_project_path(), 'data', 'xml', 'tackle-testapp-public-settings.xml')
+    custom_rule_path = os.path.join(get_project_path(), 'data', 'xml', 'tackle-dependency-custom-rule.yaml')
 
     with open(settings_template, 'r') as f:
         raw_settings = f.read()
@@ -119,7 +118,7 @@ def test_dependency_rule_analysis(analysis_data):
         maven_token = get_default_token()
     raw_settings = raw_settings.replace('GITHUB_USER', os.getenv(constants.GIT_USERNAME, 'konveyor-read-only-bot'))
     raw_settings = raw_settings.replace('GITHUB_TOKEN', maven_token)
-    tmp_dir = os.path.join(project_path, 'data', 'tmp')
+    tmp_dir = os.path.join(get_project_path(), 'data', 'tmp')
     os.makedirs(tmp_dir, exist_ok=True)
     settings_path = os.path.join(tmp_dir, 'tackle-testapp-project_dependency_rule_settings.xml')
     with open(settings_path, 'w') as f:
