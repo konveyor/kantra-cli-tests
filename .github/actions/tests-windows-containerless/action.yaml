@@ -22,7 +22,7 @@ runs:
   - uses: actions/setup-java@v4
     with:
       distribution: 'microsoft'
-      java-version: '21'
+      java-version: '25'
   - name: Set up Python
     uses: actions/setup-python@v4
     with:

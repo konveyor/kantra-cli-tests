@@ -109,7 +109,7 @@ def test_gradle_analysis_custom_rule():
 def test_dependency_rule_analysis(analysis_data):
     application_data = analysis_data['tackle-testapp-project']
     settings_template = os.path.join(get_project_path(), 'data', 'xml', 'tackle-testapp-public-settings.xml')
-    custom_rule_path = os.path.join(get_project_path(), 'data', 'xml', 'tackle-dependency-custom-rule.yaml')
+    custom_rule_path = os.path.join(get_project_path(), 'data', 'yaml', 'tackle-dependency-custom-rule.yaml')
 
     with open(settings_template, 'r') as f:
         raw_settings = f.read()
